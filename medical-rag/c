@@ -1,0 +1,5 @@
+              now              | pid | state  | wait_event_type | wait_event |                                                                    query                                                                     
+-------------------------------+-----+--------+-----------------+------------+----------------------------------------------------------------------------------------------------------------------------------------------
+ 2026-04-23 09:09:29.897297+00 | 266 | active |                 |            | select now(),pid,state,wait_event_type,wait_event,left(query,140) as query from pg_stat_activity where datname='medicalrag' and state <> 'id
+(1 row)
+
