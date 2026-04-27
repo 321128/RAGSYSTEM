@@ -1,0 +1,329 @@
+{
+  "timestamp": "2026-04-24T18:49:55.748368",
+  "summary": {
+    "total_tests": 10,
+    "successful_tests": 10,
+    "failed_tests": 0,
+    "total_time_seconds": 0,
+    "metrics": {
+      "false_no_info_responses": 0,
+      "label_leakage_count": 0,
+      "truncated_answers": 0,
+      "incomplete_answers": 1,
+      "used_fallback": 1,
+      "used_rescue": 0,
+      "used_incomplete_detection": 6,
+      "avg_answer_length": 533.9,
+      "avg_response_time": 11.858226346969605,
+      "avg_sources_retrieved": 5.0,
+      "avg_quality_score": 91.5
+    },
+    "quality_scores": [
+      85,
+      95,
+      85,
+      90,
+      95,
+      95,
+      100,
+      100,
+      90,
+      80
+    ],
+    "results": [
+      {
+        "question": "What is diabetes?",
+        "timestamp": "2026-04-24T18:47:57.165045",
+        "success": true,
+        "error": null,
+        "response_time": 10.684022188186646,
+        "answer": "Type 1 diabetes mellitus.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": false,
+          "answer_length": 25,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1123
+        },
+        "quality_analysis": {
+          "question": "What is diabetes?",
+          "answer_length": 25,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "insulin",
+            "glucose",
+            "blood sugar"
+          ],
+          "quality_score": 85
+        }
+      },
+      {
+        "question": "How does diabetes relate to Ramadan fasting?",
+        "timestamp": "2026-04-24T18:48:07.849218",
+        "success": true,
+        "error": null,
+        "response_time": 11.500253677368164,
+        "answer": "**Diabetes and Ramadan Fasting**\n\nDiabetes is related to Ramadan fasting in several ways. According to the IDF_DaR_Practical_Guidelines_Ramadan.pdf, people with diabetes may experience complications such as hypoglycaemia (low blood sugar) and hyperglycaemia (high blood sugar) due to the physiological effects of fasting during Ramadan.\n\nAdditionally, studies evaluating insulin treatments in people with Type 2 Diabetes Mellitus (T2DM) that fasted during Ramadan are mentioned in Table 7.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 489,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.0556
+        },
+        "quality_analysis": {
+          "question": "How does diabetes relate to Ramadan fasting?",
+          "answer_length": 489,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "medication"
+          ],
+          "quality_score": 95
+        }
+      },
+      {
+        "question": "What are the complications of diabetic neuropathy?",
+        "timestamp": "2026-04-24T18:48:19.349589",
+        "success": true,
+        "error": null,
+        "response_time": 12.31685996055603,
+        "answer": "Diabetic neuropathy is not explicitly listed as a complication in the provided context. However, it is mentioned that macrovascular disease can occur as a complication of diabetes, which includes conditions such as coronary artery disease and stroke.\n\nThe document does contain information on microvascular complications, including diabetic retinopathy and nephropathy, but not specifically on diabetic neuropathy.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": true,
+          "used_rescue": false,
+          "used_incomplete_detection": false,
+          "answer_length": 414,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.0971
+        },
+        "quality_analysis": {
+          "question": "What are the complications of diabetic neuropathy?",
+          "answer_length": 414,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "nerve",
+            "damage",
+            "symptoms"
+          ],
+          "quality_score": 85
+        }
+      },
+      {
+        "question": "What is diabetic retinopathy?",
+        "timestamp": "2026-04-24T18:48:31.666530",
+        "success": true,
+        "error": null,
+        "response_time": 10.798434734344482,
+        "answer": "Diabetic retinopathy is not explicitly stated in the provided context, but it can be inferred as a condition related to \"Retinopathy\" with values of 21.6 and 8.8 for the first and second measurements respectively.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": false,
+          "answer_length": 213,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1081
+        },
+        "quality_analysis": {
+          "question": "What is diabetic retinopathy?",
+          "answer_length": 213,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "eye",
+            "vision"
+          ],
+          "quality_score": 90
+        }
+      },
+      {
+        "question": "How can diabetic foot complications be prevented?",
+        "timestamp": "2026-04-24T18:48:42.465055",
+        "success": true,
+        "error": null,
+        "response_time": 11.324046611785889,
+        "answer": "Prevention of Diabetic Foot Complications\n\nAccording to the IDF DaR Practical Guidelines Ramadan (page 1), one way to prevent diabetic foot problems is through improvements in diabetes footcare prevention and management.\n\nSpecifically, it mentions that there have been improvements in diabetes footcare prevention and management in recent years, which may contribute to a lower rate of diabetic foot problems.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 409,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1258
+        },
+        "quality_analysis": {
+          "question": "How can diabetic foot complications be prevented?",
+          "answer_length": 409,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "ulcer"
+          ],
+          "quality_score": 95
+        }
+      },
+      {
+        "question": "What are effective weight loss strategies for diabetics?",
+        "timestamp": "2026-04-24T18:48:53.789183",
+        "success": true,
+        "error": null,
+        "response_time": 13.452564001083374,
+        "answer": "**Weight Loss Strategies for Diabetics**\n\nAccording to the provided context, effective weight loss strategies for diabetics include:\n\n* Weight reduction of 1200 kcal/day\n* Carbohydrates should be limited to 40-50% of daily intake, with a focus on low GI, GL, whole grains, and high fibre\n* Suhoor (pre-dawn meal) should consist of 30-40% carbohydrates (3-5.5 CHO exchanges)\n* Meals during Ramadan should aim for 300-480 kcal/meal, with examples including:\n\t+ Oats Porridge and chicken with vegetables\n\t+ Diabetes-specific formula (DSF) mixed with milk\n\t+ Water or unsweetened drink\n\nIt is also mentioned that a balanced diet with adequate protein, healthy fats, and complex carbohydrates can help manage diabetes. However, the exact weight loss strategies are not explicitly stated in the provided context.\n\n**Uncertainty:** The exact amount of daily carbohydrate intake for diabetics during Ramadan is not specified, but it is recommended to limit carbohydrates to 40-50% of daily intake.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 989,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1138
+        },
+        "quality_analysis": {
+          "question": "What are effective weight loss strategies for diabetics?",
+          "answer_length": 989,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "exercise"
+          ],
+          "quality_score": 95
+        }
+      },
+      {
+        "question": "What is the importance of diabetes education?",
+        "timestamp": "2026-04-24T18:49:07.241857",
+        "success": true,
+        "error": null,
+        "response_time": 13.121339559555054,
+        "answer": "**Importance of Diabetes Education**\n\nDiabetes education is a cornerstone for diabetes management during Ramadan. It provides people with the knowledge to make informed decisions regarding their behavior and enables them to effectively self-manage their condition. Structured diabetes education gives individuals the necessary skills to manage their condition, while Ramadan-specific diabetes education provides additional knowledge on the necessary adjustments needed for the month of Ramadan.\n\nThis type of education is essential for minimizing the risk of complications and improving clinical and metabolic parameters. It helps patients make informed decisions about managing their condition during Ramadan, such as adjusting medication, monitoring blood glucose levels, and making healthy lifestyle choices.\n\nOverall, diabetes education plays a crucial role in empowering individuals with diabetes to take control of their condition and manage it effectively during Ramadan.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 978,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1203
+        },
+        "quality_analysis": {
+          "question": "What is the importance of diabetes education?",
+          "answer_length": 978,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [],
+          "quality_score": 100
+        }
+      },
+      {
+        "question": "How is gestational diabetes managed during pregnancy?",
+        "timestamp": "2026-04-24T18:49:20.363285",
+        "success": true,
+        "error": null,
+        "response_time": 13.810541868209839,
+        "answer": "## Management of Gestational Diabetes During Pregnancy\n\nGestational diabetes (GDM) is typically managed during pregnancy through dietary intervention alone or in combination with metformin. The majority of women with GDM were managed with dietary interventions, while insulin and/or metformin may also be used.\n\nIn pregnant women with type 2 diabetes, the management strategy often involves a combination of dietary interventions, insulin, and/or metformin.\n\nIt is recommended that pregnant women with diabetes, including those with GDM, should check their blood glucose levels as indicated, but relying solely on self-monitoring of blood glucose (SMBG) during Ramadan fasting may be misleading due to its dependency on timing and frequency. Instead, Continuous Glucose Monitoring (CGM) or Flash Glucose Monitoring (FGM) devices can provide a more comprehensive glucose profile and better opportunities for intervention.\n\nThe safety of each management strategy, including insulin, metformin, dieting, or a combination of all three, in pregnant women with GDM during Ramadan fasting is not well established and requires further investigation.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 1141,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1175
+        },
+        "quality_analysis": {
+          "question": "How is gestational diabetes managed during pregnancy?",
+          "answer_length": 1141,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [],
+          "quality_score": 100
+        }
+      },
+      {
+        "question": "What role does nutrition play in diabetes management?",
+        "timestamp": "2026-04-24T18:49:34.173902",
+        "success": true,
+        "error": null,
+        "response_time": 11.098908185958862,
+        "answer": "Nutrition plays a crucial role in diabetes management, particularly during Ramadan when changes in diet and lifestyle can increase the incidence of episodes of hypoglycaemia and hyperglycaemia. Individuals with diabetes should be provided with knowledge to carry out self-monitoring of blood glucose (SMBG) and have skills to effectively self-manage their disease through sound knowledge, the right attitude, and correct practices.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": false,
+          "answer_length": 431,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1139
+        },
+        "quality_analysis": {
+          "question": "What role does nutrition play in diabetes management?",
+          "answer_length": 431,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "carbohydrates",
+            "blood sugar"
+          ],
+          "quality_score": 90
+        }
+      },
+      {
+        "question": "What are the first line treatments for type 2 diabetes?",
+        "timestamp": "2026-04-24T18:49:45.272974",
+        "success": true,
+        "error": null,
+        "response_time": 10.475292682647705,
+        "answer": "First-line treatment for Type 2 Diabetes.\n\nAccording to the provided context, the first-line treatment options mentioned are:\n\n- Insulin Pump\n- MDI (Multiple Daily Injections)\n\nThese options are supported by references Deeb et al and Al Amoudi et al.",
+        "sources_count": 5,
+        "debug_info": {
+          "used_fallback": false,
+          "used_rescue": false,
+          "used_incomplete_detection": true,
+          "answer_length": 250,
+          "retrieved_count": 5,
+          "top_similarity_score": 0.1032
+        },
+        "quality_analysis": {
+          "question": "What are the first line treatments for type 2 diabetes?",
+          "answer_length": 250,
+          "is_no_info_response": false,
+          "has_label_leakage": false,
+          "leaked_label": null,
+          "is_truncated": false,
+          "missing_keywords": [
+            "medication"
+          ],
+          "quality_score": 80,
+          "is_potentially_incomplete": true
+        }
+      }
+    ]
+  }
+}

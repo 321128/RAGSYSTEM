@@ -1,0 +1,54 @@
+{
+  "test_cases": [
+    {
+      "question": "What is diabetes?",
+      "expected_keywords": ["diabetes", "insulin", "glucose", "blood sugar"],
+      "should_have_answer": true
+    },
+    {
+      "question": "How does diabetes relate to Ramadan fasting?",
+      "expected_keywords": ["Ramadan", "fasting", "diabetes", "medication"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What are the complications of diabetic neuropathy?",
+      "expected_keywords": ["neuropathy", "nerve", "damage", "symptoms"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What is diabetic retinopathy?",
+      "expected_keywords": ["retinopathy", "eye", "vision", "diabetic"],
+      "should_have_answer": true
+    },
+    {
+      "question": "How can diabetic foot complications be prevented?",
+      "expected_keywords": ["foot", "prevention", "care", "ulcer"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What are effective weight loss strategies for diabetics?",
+      "expected_keywords": ["weight loss", "diabetes", "diet", "exercise"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What is the importance of diabetes education?",
+      "expected_keywords": ["education", "diabetes", "management", "patient"],
+      "should_have_answer": true
+    },
+    {
+      "question": "How is gestational diabetes managed during pregnancy?",
+      "expected_keywords": ["gestational", "pregnancy", "glucose", "management"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What role does nutrition play in diabetes management?",
+      "expected_keywords": ["nutrition", "diet", "carbohydrates", "blood sugar"],
+      "should_have_answer": true
+    },
+    {
+      "question": "What are the first line treatments for type 2 diabetes?",
+      "expected_keywords": ["treatment", "medication", "insulin", "diabetes"],
+      "should_have_answer": true
+    }
+  ]
+}

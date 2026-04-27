@@ -69,18 +69,20 @@ def ingest(
     chunk_size: int | None = None,
     chunk_overlap: int | None = None,
     replace_collection: bool = False,
+    documents_dir: Path | None = None,
+    collection_name: str | None = None,
     progress_callback: Callable[[dict], None] | None = None,
 ) -> IngestResult:
     chunk_size = chunk_size if chunk_size is not None else SETTINGS.ingest_chunk_size
     chunk_overlap = chunk_overlap if chunk_overlap is not None else SETTINGS.ingest_chunk_overlap
 
-    documents_dir = Path(__file__).resolve().parent / SETTINGS.documents_dir
-    documents_dir = documents_dir.resolve()
+    resolved_documents_dir = documents_dir or (Path(__file__).resolve().parent / SETTINGS.documents_dir)
+    resolved_documents_dir = resolved_documents_dir.resolve()
 
-    pdf_files = sorted(documents_dir.glob("*.pdf"), key=lambda p: p.name.lower())
+    pdf_files = sorted(resolved_documents_dir.glob("*.pdf"), key=lambda p: p.name.lower())
 
     if not pdf_files:
-        print(f"No PDFs found in {documents_dir}")
+        print(f"No PDFs found in {resolved_documents_dir}")
         return IngestResult(
             scanned_files=0,
             parsed_documents=0,
@@ -129,7 +131,7 @@ def ingest(
     embeddings = get_embeddings()
     vectorstore = PGVector(
         connection_string=SETTINGS.database_url,
-        collection_name=SETTINGS.collection_name,
+        collection_name=collection_name or SETTINGS.collection_name,
         embedding_function=embeddings,
     )
 
