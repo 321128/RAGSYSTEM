@@ -5,6 +5,15 @@ const API_BASE_URL =
 
 export default function App() {
   const [backendHealth, setBackendHealth] = useState('unknown');
+  const [knowledgeBases, setKnowledgeBases] = useState([]);
+  const [activeKnowledgeBase, setActiveKnowledgeBase] = useState('default');
+  const [newKnowledgeBaseName, setNewKnowledgeBaseName] = useState('');
+  const [kbMessage, setKbMessage] = useState('');
+  const [kbError, setKbError] = useState('');
+  const [creatingKnowledgeBase, setCreatingKnowledgeBase] = useState(false);
+  const [switchingKnowledgeBase, setSwitchingKnowledgeBase] = useState(false);
+  const [deletingKnowledgeBase, setDeletingKnowledgeBase] = useState(false);
+  const [kbDeleteConfirm, setKbDeleteConfirm] = useState('');
   const [settings, setSettings] = useState(null);
   const [editSettings, setEditSettings] = useState(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -28,7 +37,21 @@ export default function App() {
   const canUpload = useMemo(() => selectedFiles.length > 0 && !uploading, [selectedFiles, uploading]);
   const canIngest = useMemo(() => !ingesting && !uploading, [ingesting, uploading]);
   const canClearData = useMemo(() => !ingesting && !uploading, [ingesting, uploading]);
+  const canCreateKnowledgeBase = useMemo(
+    () => newKnowledgeBaseName.trim().length > 0 && !creatingKnowledgeBase,
+    [newKnowledgeBaseName, creatingKnowledgeBase]
+  );
   const ingestProgress = ingestStatus?.progress || null;
+
+  const withKnowledgeBase = (path, knowledgeBaseOverride = null) => {
+    const kb = (knowledgeBaseOverride || activeKnowledgeBase)?.trim();
+    if (!kb) {
+      return `${API_BASE_URL}${path}`;
+    }
+
+    const joiner = path.includes('?') ? '&' : '?';
+    return `${API_BASE_URL}${path}${joiner}knowledge_base=${encodeURIComponent(kb)}`;
+  };
 
   const overallProgressPercent = useMemo(() => {
     if (!ingestProgress || !ingestProgress.total_files) {
@@ -41,9 +64,9 @@ export default function App() {
     return Math.max(0, Math.min(100, Math.round(pct)));
   }, [ingestProgress]);
 
-  const refreshDocuments = async () => {
+  const refreshDocuments = async (knowledgeBaseOverride = null) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/documents`);
+      const response = await fetch(withKnowledgeBase('/documents', knowledgeBaseOverride));
       if (!response.ok) {
         throw new Error(`Failed to fetch documents (${response.status})`);
       }
@@ -73,6 +96,9 @@ export default function App() {
 
       const data = await response.json();
       setSettings(data);
+      if (data.active_knowledge_base) {
+        setActiveKnowledgeBase(data.active_knowledge_base);
+      }
       setEditSettings({
         llm_model: data.llm_model,
         llm_temperature: data.llm_temperature,
@@ -84,6 +110,145 @@ export default function App() {
       });
     } catch (err) {
       setError(err.message || 'Failed to load settings.');
+    }
+  };
+
+  const refreshKnowledgeBases = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/knowledge-bases`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch knowledge bases (${response.status})`);
+      }
+
+      const data = await response.json();
+      const list = Array.isArray(data.knowledge_bases) ? data.knowledge_bases : [];
+      setKnowledgeBases(list);
+
+      if (data.active_knowledge_base) {
+        setActiveKnowledgeBase(data.active_knowledge_base);
+        return data.active_knowledge_base;
+      } else if (list.length > 0 && !list.includes(activeKnowledgeBase)) {
+        setActiveKnowledgeBase(list[0]);
+        return list[0];
+      }
+
+      return activeKnowledgeBase;
+    } catch (err) {
+      setKbError(err.message || 'Failed to load knowledge bases.');
+      return activeKnowledgeBase;
+    }
+  };
+
+  const handleKnowledgeBaseSwitch = async (nextKnowledgeBase) => {
+    if (!nextKnowledgeBase || switchingKnowledgeBase) {
+      return;
+    }
+
+    setKbError('');
+    setKbMessage('');
+    setSwitchingKnowledgeBase(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/knowledge-bases/active`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ knowledge_base: nextKnowledgeBase }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || `Failed to switch knowledge base (${response.status})`);
+      }
+
+      setActiveKnowledgeBase(nextKnowledgeBase);
+      setKbMessage(`Active knowledge base: ${nextKnowledgeBase}`);
+      await refreshKnowledgeBases();
+      await refreshDocuments(nextKnowledgeBase);
+      await fetchIngestStatus(nextKnowledgeBase);
+      await refreshSettings();
+      setAnswer('');
+      setSources([]);
+    } catch (err) {
+      setKbError(err.message || 'Failed to switch knowledge base.');
+    } finally {
+      setSwitchingKnowledgeBase(false);
+    }
+  };
+
+  const handleKnowledgeBaseCreate = async (event) => {
+    event.preventDefault();
+    if (!canCreateKnowledgeBase) {
+      return;
+    }
+
+    const candidate = newKnowledgeBaseName.trim();
+    setCreatingKnowledgeBase(true);
+    setKbError('');
+    setKbMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/knowledge-bases`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ knowledge_base: candidate }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || `Failed to create knowledge base (${response.status})`);
+      }
+
+      setNewKnowledgeBaseName('');
+      await refreshKnowledgeBases();
+      setKbMessage(`Knowledge base created: ${candidate}`);
+      await handleKnowledgeBaseSwitch(candidate);
+    } catch (err) {
+      setKbError(err.message || 'Failed to create knowledge base.');
+    } finally {
+      setCreatingKnowledgeBase(false);
+    }
+  };
+
+  const handleKnowledgeBaseDelete = async (event) => {
+    event.preventDefault();
+    if (!kbDeleteConfirm) {
+      return;
+    }
+
+    const kbToDelete = kbDeleteConfirm.trim();
+    setDeletingKnowledgeBase(true);
+    setKbError('');
+    setKbMessage('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/knowledge-bases/${encodeURIComponent(kbToDelete)}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || `Failed to delete knowledge base (${response.status})`);
+      }
+
+      setKbDeleteConfirm('');
+      await refreshKnowledgeBases();
+      setKbMessage(`Knowledge base deleted: ${kbToDelete}`);
+      await refreshDocuments();
+      await fetchIngestStatus();
+      await refreshSettings();
+      setAnswer('');
+      setSources([]);
+    } catch (err) {
+      setKbError(err.message || 'Failed to delete knowledge base.');
+    } finally {
+      setDeletingKnowledgeBase(false);
     }
   };
 
@@ -164,7 +329,11 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ delete_files: true, delete_vectorstore: true }),
+        body: JSON.stringify({
+          delete_files: true,
+          delete_vectorstore: true,
+          knowledge_base: activeKnowledgeBase,
+        }),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -188,16 +357,19 @@ export default function App() {
       setIngesting(false);
       refreshSettings();
       setSettingsMessage(
-        `Cleared ${Array.isArray(data.deleted_files) ? data.deleted_files.length : 0} files${data.deleted_vectorstore ? ' and vectorstore collection.' : '.'}`
+        `Cleared ${Array.isArray(data.deleted_files) ? data.deleted_files.length : 0} files in ${activeKnowledgeBase}${data.deleted_vectorstore ? ' and vectorstore collection.' : '.'}`
       );
     } catch (err) {
       setError(err.message || 'Failed to clear data.');
     }
   };
 
-  const fetchIngestStatus = async () => {
+  const fetchIngestStatus = async (knowledgeBaseOverride = null) => {
+    const kb = knowledgeBaseOverride || activeKnowledgeBase;
     try {
-      const response = await fetch(`${API_BASE_URL}/ingest/status`);
+      const response = await fetch(
+        `${API_BASE_URL}/ingest/status?knowledge_base=${encodeURIComponent(kb)}`
+      );
       if (!response.ok) {
         throw new Error(`Failed to fetch ingest status (${response.status})`);
       }
@@ -221,10 +393,15 @@ export default function App() {
   };
 
   useEffect(() => {
-    refreshDocuments();
-    fetchIngestStatus();
-    refreshSettings();
-    refreshBackendHealth();
+    const bootstrap = async () => {
+      await refreshBackendHealth();
+      const initialKnowledgeBase = await refreshKnowledgeBases();
+      await refreshSettings();
+      await refreshDocuments(initialKnowledgeBase);
+      await fetchIngestStatus(initialKnowledgeBase);
+    };
+
+    bootstrap();
   }, []);
 
   useEffect(() => {
@@ -234,7 +411,7 @@ export default function App() {
 
     const timer = setInterval(fetchIngestStatus, 2000);
     return () => clearInterval(timer);
-  }, [ingesting]);
+  }, [ingesting, activeKnowledgeBase]);
 
   const handleFileSelection = (event) => {
     const files = Array.from(event.target.files || []);
@@ -254,7 +431,7 @@ export default function App() {
       const formData = new FormData();
       selectedFiles.forEach((file) => formData.append('files', file));
 
-      const response = await fetch(`${API_BASE_URL}/upload`, {
+      const response = await fetch(withKnowledgeBase('/upload'), {
         method: 'POST',
         body: formData,
       });
@@ -291,6 +468,7 @@ export default function App() {
           chunk_size: Number(chunkSize),
           chunk_overlap: Number(chunkOverlap),
           replace_collection: replaceCollection,
+          knowledge_base: activeKnowledgeBase,
         }),
       });
 
@@ -321,7 +499,10 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: question.trim() }),
+        body: JSON.stringify({
+          question: question.trim(),
+          knowledge_base: activeKnowledgeBase,
+        }),
       });
 
       if (!response.ok) {
@@ -348,10 +529,91 @@ export default function App() {
         <p className="subtitle">Ask questions over your ingested medical documents.</p>
 
         <section className="ingest-panel">
+          <h2>Knowledge Bases</h2>
+          <p className="meta">
+            Active knowledge base: <strong>{activeKnowledgeBase}</strong>
+          </p>
+
+          <form className="kb-switch-row" onSubmit={(event) => event.preventDefault()}>
+            <label htmlFor="kb-select">Select knowledge base</label>
+            <select
+              id="kb-select"
+              value={activeKnowledgeBase}
+              onChange={(e) => handleKnowledgeBaseSwitch(e.target.value)}
+              disabled={switchingKnowledgeBase || ingesting}
+            >
+              {knowledgeBases.length === 0 ? (
+                <option value="default">default</option>
+              ) : (
+                knowledgeBases.map((kb) => (
+                  <option key={kb} value={kb}>
+                    {kb}
+                  </option>
+                ))
+              )}
+            </select>
+          </form>
+
+          <form className="kb-create-row" onSubmit={handleKnowledgeBaseCreate}>
+            <label htmlFor="kb-new">Create new knowledge base folder</label>
+            <input
+              id="kb-new"
+              type="text"
+              value={newKnowledgeBaseName}
+              onChange={(e) => setNewKnowledgeBaseName(e.target.value)}
+              placeholder="Example: endocrinology-set-2"
+              disabled={creatingKnowledgeBase || ingesting}
+            />
+            <button type="submit" disabled={!canCreateKnowledgeBase || ingesting}>
+              {creatingKnowledgeBase ? 'Creating...' : 'Create and switch'}
+            </button>
+          </form>
+
+          <form className="kb-delete-row" onSubmit={handleKnowledgeBaseDelete}>
+            <fieldset>
+              <legend>Delete knowledge base folder</legend>
+              {kbDeleteConfirm !== '' && (
+                <div className="warning-box">
+                  <p><strong>⚠️ This will permanently delete:</strong></p>
+                  <ul>
+                    <li>All documents in the <code>{kbDeleteConfirm}</code> folder</li>
+                    <li>All vectors in the database collection</li>
+                    <li>All ingestion history</li>
+                  </ul>
+                  <p>This cannot be undone. Are you sure?</p>
+                </div>
+              )}
+              <select
+                value={kbDeleteConfirm}
+                onChange={(e) => setKbDeleteConfirm(e.target.value)}
+                disabled={deletingKnowledgeBase || ingesting}
+              >
+                <option value="">Select knowledge base to delete...</option>
+                {knowledgeBases.map((kb) => (
+                  kb !== 'default' && (
+                    <option key={kb} value={kb}>
+                      {kb}
+                    </option>
+                  )
+                ))}
+              </select>
+              <button 
+                type="submit" 
+                disabled={kbDeleteConfirm === '' || deletingKnowledgeBase || ingesting}
+                className="danger-button"
+              >
+                {deletingKnowledgeBase ? 'Deleting...' : 'Delete'}
+              </button>
+            </fieldset>
+          </form>
+
+          {kbMessage ? <p className="ok-text">{kbMessage}</p> : null}
+          {kbError ? <p className="error">{kbError}</p> : null}
+
           <div className="status-row">
             <span className={`health-pill health-${backendHealth}`}>Backend: {backendHealth}</span>
             <div className="toolbar-buttons">
-              <button type="button" className="secondary-button" onClick={() => { refreshBackendHealth(); refreshSettings(); refreshDocuments(); fetchIngestStatus(); }}>
+              <button type="button" className="secondary-button" onClick={() => { refreshBackendHealth(); refreshKnowledgeBases(); refreshSettings(); refreshDocuments(); fetchIngestStatus(); }}>
                 Refresh dashboard
               </button>
               <button type="button" className="danger-button" onClick={handleClearData} disabled={!canClearData}>

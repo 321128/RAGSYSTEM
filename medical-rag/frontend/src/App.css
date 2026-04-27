@@ -54,6 +54,58 @@ h1 {
   background: #f9fafb;
 }
 
+.kb-switch-row,
+.kb-create-row,
+.kb-delete-row {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.kb-delete-row fieldset {
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 0;
+}
+
+.kb-delete-row legend {
+  color: #991b1b;
+  font-weight: 600;
+  padding: 0 8px;
+}
+
+.warning-box {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.warning-box p {
+  margin: 6px 0;
+  color: #991b1b;
+  font-size: 0.9rem;
+}
+
+.warning-box strong {
+  color: #dc2626;
+}
+
+.warning-box ul {
+  margin: 6px 0;
+  padding-left: 20px;
+  color: #991b1b;
+}
+
+.warning-box code {
+  background: #fecaca;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+}
+
 .status-row {
   display: flex;
   gap: 12px;
@@ -152,7 +204,9 @@ h1 {
 }
 
 input[type='number'],
-input[type='file'] {
+input[type='file'],
+input[type='text'],
+select {
   width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 8px;

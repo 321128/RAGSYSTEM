@@ -18,6 +18,7 @@ The app supports:
 - PDF parsing with Docling-first and PyPDF fallback
 - Chunking and embedding into pgvector
 - Retrieval-augmented question answering
+- Multiple knowledge bases (separate document folders + separate vector collections)
 - Clear-data and re-ingest flows
 
 For day-to-day operations, use `bash script.sh` to start the stack and `bash stop.sh` to shut it down.

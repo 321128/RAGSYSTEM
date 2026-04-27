@@ -45,7 +45,7 @@ SETTINGS = Settings(
     retriever_top_k=int(os.getenv("RETRIEVER_TOP_K", "5")),
     llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
     ollama_num_ctx=int(os.getenv("OLLAMA_NUM_CTX", "8192")),
-    ollama_num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "512")),
+    ollama_num_predict=int(os.getenv("OLLAMA_NUM_PREDICT", "768")),
     ollama_request_timeout_seconds=int(os.getenv("OLLAMA_REQUEST_TIMEOUT_SECONDS", "30")),
     ask_timeout_seconds=int(os.getenv("ASK_TIMEOUT_SECONDS", "60")),
 )

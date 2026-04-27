@@ -12,39 +12,35 @@ logger = logging.getLogger(__name__)
 
 
 PROMPT = PromptTemplate(
-    template="""You are a medical research assistant.
+    template="""You are a medical research assistant answering from retrieved context only.
+
+Using the context below, answer the question directly and concisely.
 
 Rules:
-- Use only the provided context.
-- Do not use outside knowledge.
-- If relevant evidence exists, answer directly from that evidence.
-- If no relevant evidence exists, reply exactly: The document does not contain this information.
-- Do not output internal labels like FACT/SHORT, DESCRIPTIVE, Mode, or Classification.
+- Base your answer entirely on the provided context.
+- If the context contains relevant information, provide a complete answer from that evidence.
+- If context is partial but relevant, provide the best answer you can support.
+- Never use external knowledge or assumptions beyond what the context states.
+- Do not output any internal formatting labels like STRUCTURED, FACT/SHORT, DESCRIPTIVE, Mode, or Classification.
+- Plain text only; no unnecessary formatting.
+- Only reply "The document does not contain this information." if the context is completely unrelated to the question.
 
-Formatting:
-- For simple factual questions: 1-3 concise sentences.
-- For explanatory questions: clear sections with concise bullet points.
-- Include important details and numbers when present in context.
-- Do not repeat points.
-
-CONTEXT:
+Context:
 {context}
 
--------------------------
-QUESTION:
+Question:
 {question}
 
--------------------------
-FINAL ANSWER:""",
+Answer:""",
     input_variables=["context", "question"],
 )
 
 
-def get_vectorstore() -> PGVector:
+def get_vectorstore(collection_name: str | None = None) -> PGVector:
     embeddings = get_embeddings()
     return PGVector(
         connection_string=SETTINGS.database_url,
-        collection_name=SETTINGS.collection_name,
+        collection_name=collection_name or SETTINGS.collection_name,
         embedding_function=embeddings,
     )
 
@@ -116,11 +112,12 @@ def build_qa_chain(
     llm_temperature: float | None = None,
     ollama_num_ctx: int | None = None,
     ollama_num_predict: int | None = None,
+    collection_name: str | None = None,
     use_mmr: bool = False,
 ) -> RetrievalQA:
     top_k = SETTINGS.retriever_top_k if retriever_top_k is None else retriever_top_k
 
-    vectorstore = get_vectorstore()
+    vectorstore = get_vectorstore(collection_name=collection_name)
     
     # Use MMR (Maximal Marginal Relevance) for better diversity and relevance
     # This reduces redundancy in retrieved chunks while maintaining relevance
@@ -207,7 +204,12 @@ def generate_fallback_answer_from_docs(
     return str(result).strip()
 
 
-def debug_retrieve(query: str, top_k: int | None = None, include_scores: bool = True) -> list[dict]:
+def debug_retrieve(
+    query: str,
+    top_k: int | None = None,
+    include_scores: bool = True,
+    collection_name: str | None = None,
+) -> list[dict]:
     """
     Debug retrieval to inspect which chunks are being retrieved for a query.
     Returns detailed information about each retrieved document including similarity scores.
@@ -222,7 +224,7 @@ def debug_retrieve(query: str, top_k: int | None = None, include_scores: bool = 
     """
     k = SETTINGS.retriever_top_k if top_k is None else top_k
     
-    vectorstore = get_vectorstore()
+    vectorstore = get_vectorstore(collection_name=collection_name)
     embeddings = get_embeddings()
     
     # Get similarity search with scores
@@ -255,7 +257,12 @@ def debug_retrieve(query: str, top_k: int | None = None, include_scores: bool = 
         return results
 
 
-def debug_retrieve_with_threshold(query: str, similarity_threshold: float = 0.5, top_k: int | None = None) -> list[dict]:
+def debug_retrieve_with_threshold(
+    query: str,
+    similarity_threshold: float = 0.5,
+    top_k: int | None = None,
+    collection_name: str | None = None,
+) -> list[dict]:
     """
     Retrieve documents only if they meet a minimum similarity threshold.
     Useful for filtering out low-quality matches.
@@ -270,7 +277,7 @@ def debug_retrieve_with_threshold(query: str, similarity_threshold: float = 0.5,
     """
     k = SETTINGS.retriever_top_k * 2 if top_k is None else top_k
     
-    vectorstore = get_vectorstore()
+    vectorstore = get_vectorstore(collection_name=collection_name)
     docs_with_scores = vectorstore.similarity_search_with_score(query, k=k)
     
     results = []
@@ -289,7 +296,12 @@ def debug_retrieve_with_threshold(query: str, similarity_threshold: float = 0.5,
     return results
 
 
-def debug_mmr_retrieve(query: str, top_k: int | None = None, lambda_mult: float = 0.5) -> list[dict]:
+def debug_mmr_retrieve(
+    query: str,
+    top_k: int | None = None,
+    lambda_mult: float = 0.5,
+    collection_name: str | None = None,
+) -> list[dict]:
     """
     Use Maximal Marginal Relevance (MMR) to retrieve diverse, relevant documents.
     MMR reduces redundancy by penalizing documents similar to already-selected ones.
@@ -304,7 +316,7 @@ def debug_mmr_retrieve(query: str, top_k: int | None = None, lambda_mult: float 
     """
     k = SETTINGS.retriever_top_k if top_k is None else top_k
     
-    vectorstore = get_vectorstore()
+    vectorstore = get_vectorstore(collection_name=collection_name)
     docs = vectorstore.max_marginal_relevance_search(query, k=k, fetch_k=k * 3, lambda_mult=lambda_mult)
     
     results = []
