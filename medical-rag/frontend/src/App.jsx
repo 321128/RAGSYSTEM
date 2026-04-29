@@ -84,8 +84,6 @@ export default function App() {
   );
   const ingestProgress = ingestStatus?.progress || null;
 
-<<<<<<< Updated upstream
-=======
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
@@ -97,7 +95,6 @@ export default function App() {
     }
   }, [theme]);
 
->>>>>>> Stashed changes
   const withKnowledgeBase = (path, knowledgeBaseOverride = null) => {
     const kb = (knowledgeBaseOverride || activeKnowledgeBase)?.trim();
     if (!kb) {
@@ -119,8 +116,6 @@ export default function App() {
     return Math.max(0, Math.min(100, Math.round(pct)));
   }, [ingestProgress]);
 
-<<<<<<< Updated upstream
-=======
   const nonDefaultKnowledgeBases = useMemo(
     () => knowledgeBases.filter((knowledgeBase) => knowledgeBase !== 'default'),
     [knowledgeBases]
@@ -139,7 +134,6 @@ export default function App() {
   const sourceCount = sources.length;
   const ingestState = ingestStatus?.status || 'idle';
 
->>>>>>> Stashed changes
   const refreshDocuments = async (knowledgeBaseOverride = null) => {
     try {
       const response = await fetch(withKnowledgeBase('/documents', knowledgeBaseOverride));
@@ -606,99 +600,6 @@ export default function App() {
     fetchIngestStatus();
   };
 
-<<<<<<< Updated upstream
-        <section className="ingest-panel">
-          <h2>Knowledge Bases</h2>
-          <p className="meta">
-            Active knowledge base: <strong>{activeKnowledgeBase}</strong>
-          </p>
-
-          <form className="kb-switch-row" onSubmit={(event) => event.preventDefault()}>
-            <label htmlFor="kb-select">Select knowledge base</label>
-            <select
-              id="kb-select"
-              value={activeKnowledgeBase}
-              onChange={(e) => handleKnowledgeBaseSwitch(e.target.value)}
-              disabled={switchingKnowledgeBase || ingesting}
-            >
-              {knowledgeBases.length === 0 ? (
-                <option value="default">default</option>
-              ) : (
-                knowledgeBases.map((kb) => (
-                  <option key={kb} value={kb}>
-                    {kb}
-                  </option>
-                ))
-              )}
-            </select>
-          </form>
-
-          <form className="kb-create-row" onSubmit={handleKnowledgeBaseCreate}>
-            <label htmlFor="kb-new">Create new knowledge base folder</label>
-            <input
-              id="kb-new"
-              type="text"
-              value={newKnowledgeBaseName}
-              onChange={(e) => setNewKnowledgeBaseName(e.target.value)}
-              placeholder="Example: endocrinology-set-2"
-              disabled={creatingKnowledgeBase || ingesting}
-            />
-            <button type="submit" disabled={!canCreateKnowledgeBase || ingesting}>
-              {creatingKnowledgeBase ? 'Creating...' : 'Create and switch'}
-            </button>
-          </form>
-
-          <form className="kb-delete-row" onSubmit={handleKnowledgeBaseDelete}>
-            <fieldset>
-              <legend>Delete knowledge base folder</legend>
-              {kbDeleteConfirm !== '' && (
-                <div className="warning-box">
-                  <p><strong>⚠️ This will permanently delete:</strong></p>
-                  <ul>
-                    <li>All documents in the <code>{kbDeleteConfirm}</code> folder</li>
-                    <li>All vectors in the database collection</li>
-                    <li>All ingestion history</li>
-                  </ul>
-                  <p>This cannot be undone. Are you sure?</p>
-                </div>
-              )}
-              <select
-                value={kbDeleteConfirm}
-                onChange={(e) => setKbDeleteConfirm(e.target.value)}
-                disabled={deletingKnowledgeBase || ingesting}
-              >
-                <option value="">Select knowledge base to delete...</option>
-                {knowledgeBases.map((kb) => (
-                  kb !== 'default' && (
-                    <option key={kb} value={kb}>
-                      {kb}
-                    </option>
-                  )
-                ))}
-              </select>
-              <button 
-                type="submit" 
-                disabled={kbDeleteConfirm === '' || deletingKnowledgeBase || ingesting}
-                className="danger-button"
-              >
-                {deletingKnowledgeBase ? 'Deleting...' : 'Delete'}
-              </button>
-            </fieldset>
-          </form>
-
-          {kbMessage ? <p className="ok-text">{kbMessage}</p> : null}
-          {kbError ? <p className="error">{kbError}</p> : null}
-
-          <div className="status-row">
-            <span className={`health-pill health-${backendHealth}`}>Backend: {backendHealth}</span>
-            <div className="toolbar-buttons">
-              <button type="button" className="secondary-button" onClick={() => { refreshBackendHealth(); refreshKnowledgeBases(); refreshSettings(); refreshDocuments(); fetchIngestStatus(); }}>
-                Refresh dashboard
-              </button>
-              <button type="button" className="danger-button" onClick={handleClearData} disabled={!canClearData}>
-                {ingesting ? 'Clear disabled during ingest' : 'Clear data'}
-              </button>
-=======
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -734,7 +635,6 @@ export default function App() {
               <span className="muted">
                 {ingestProgress ? `${overallProgressPercent}% indexed` : 'Idle until you start ingestion'}
               </span>
->>>>>>> Stashed changes
             </div>
           </div>
         </div>
