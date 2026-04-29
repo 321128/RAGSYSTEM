@@ -103,7 +103,7 @@ Use the provided startup script:
 VENV_PY=$(pwd)/.venv/bin/python ./script.sh
 ```
 
-This starts:
+This starts:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 - PostgreSQL + pgvector database (port 5202)
 - FastAPI backend (port 5200)
 - React frontend (port 5201)
