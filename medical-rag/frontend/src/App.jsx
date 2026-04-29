@@ -1,7 +1,31 @@
 import { useEffect, useMemo, useState } from 'react';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5200';
+const DEFAULT_API_PORT = 5200;
+const LOCALHOST_API_URL = /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i;
+
+const getApiBaseUrl = () => {
+  const configuredUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configuredUrl && !LOCALHOST_API_URL.test(configuredUrl)) {
+    return configuredUrl;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    return `${window.location.protocol}//${window.location.hostname}:${DEFAULT_API_PORT}`;
+  }
+
+  return `http://127.0.0.1:${DEFAULT_API_PORT}`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+const NAV_ITEMS = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'knowledge-bases', label: 'Knowledge Bases' },
+  { id: 'documents', label: 'Documents' },
+  { id: 'ingest', label: 'Ingest' },
+  { id: 'chat', label: 'Chat' },
+  { id: 'settings', label: 'Settings' },
+];
 
 export default function App() {
   const [backendHealth, setBackendHealth] = useState('unknown');
@@ -32,6 +56,23 @@ export default function App() {
   const [chunkSize, setChunkSize] = useState(800);
   const [chunkOverlap, setChunkOverlap] = useState(120);
   const [replaceCollection, setReplaceCollection] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') {
+      return 'dark';
+    }
+
+    try {
+      const savedTheme = window.localStorage.getItem('medical-rag-theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        return savedTheme;
+      }
+    } catch {
+      // Ignore storage access failures and fall back to system preference.
+    }
+
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+  const [activeSection, setActiveSection] = useState('overview');
 
   const canAsk = useMemo(() => question.trim().length > 0 && !loading, [question, loading]);
   const canUpload = useMemo(() => selectedFiles.length > 0 && !uploading, [selectedFiles, uploading]);
@@ -43,6 +84,20 @@ export default function App() {
   );
   const ingestProgress = ingestStatus?.progress || null;
 
+<<<<<<< Updated upstream
+=======
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+
+    try {
+      window.localStorage.setItem('medical-rag-theme', theme);
+    } catch {
+      // Ignore storage access failures.
+    }
+  }, [theme]);
+
+>>>>>>> Stashed changes
   const withKnowledgeBase = (path, knowledgeBaseOverride = null) => {
     const kb = (knowledgeBaseOverride || activeKnowledgeBase)?.trim();
     if (!kb) {
@@ -64,6 +119,27 @@ export default function App() {
     return Math.max(0, Math.min(100, Math.round(pct)));
   }, [ingestProgress]);
 
+<<<<<<< Updated upstream
+=======
+  const nonDefaultKnowledgeBases = useMemo(
+    () => knowledgeBases.filter((knowledgeBase) => knowledgeBase !== 'default'),
+    [knowledgeBases]
+  );
+
+  const knowledgeBaseCount = useMemo(() => {
+    if (knowledgeBases.length === 0) {
+      return 1;
+    }
+
+    return knowledgeBases.length;
+  }, [knowledgeBases]);
+
+  const activeKnowledgeBaseLabel = activeKnowledgeBase || 'default';
+  const documentCount = documents.length;
+  const sourceCount = sources.length;
+  const ingestState = ingestStatus?.status || 'idle';
+
+>>>>>>> Stashed changes
   const refreshDocuments = async (knowledgeBaseOverride = null) => {
     try {
       const response = await fetch(withKnowledgeBase('/documents', knowledgeBaseOverride));
@@ -522,12 +598,15 @@ export default function App() {
     }
   };
 
-  return (
-    <main className="page">
-      <section className="card">
-        <h1>Medical RAG Assistant</h1>
-        <p className="subtitle">Ask questions over your ingested medical documents.</p>
+  const refreshDashboard = () => {
+    refreshBackendHealth();
+    refreshKnowledgeBases();
+    refreshSettings();
+    refreshDocuments();
+    fetchIngestStatus();
+  };
 
+<<<<<<< Updated upstream
         <section className="ingest-panel">
           <h2>Knowledge Bases</h2>
           <p className="meta">
@@ -619,159 +698,317 @@ export default function App() {
               <button type="button" className="danger-button" onClick={handleClearData} disabled={!canClearData}>
                 {ingesting ? 'Clear disabled during ingest' : 'Clear data'}
               </button>
+=======
+  return (
+    <main className="app-shell">
+      <aside className="sidebar">
+        <div className="brand-block">
+          <div className="brand-mark">MR</div>
+          <div>
+            <p className="brand-kicker">Medical RAG Console</p>
+            <h1>Clinical workspace</h1>
+          </div>
+        </div>
+
+        <div className="sidebar-section">
+          <p className="section-label">System status</p>
+          <div className="status-stack">
+            <div className="status-card">
+              <span className={`health-pill health-${backendHealth}`}>Backend {backendHealth}</span>
+              <strong>{settings?.llm_provider || 'Loading...'}</strong>
+              <span className="muted">{settings?.embedding_model || 'Fetching settings...'}</span>
+            </div>
+            <div className="status-card">
+              <span className="status-label">Active KB</span>
+              <strong>{activeKnowledgeBaseLabel}</strong>
+              <span className="muted">{knowledgeBaseCount} available collections</span>
+            </div>
+            <div className="status-card">
+              <span className="status-label">Documents</span>
+              <strong>{documentCount}</strong>
+              <span className="muted">PDFs in the active folder</span>
+            </div>
+            <div className="status-card">
+              <span className="status-label">Ingestion</span>
+              <strong>{ingestState}</strong>
+              <span className="muted">
+                {ingestProgress ? `${overallProgressPercent}% indexed` : 'Idle until you start ingestion'}
+              </span>
+>>>>>>> Stashed changes
             </div>
           </div>
+        </div>
 
-          <h2>Current Settings</h2>
-          {settings && editSettings ? (
-            <form className="settings-form" onSubmit={handleSaveSettings}>
-              <div className="settings-grid">
-                <div><strong>LLM provider:</strong> {settings.llm_provider}</div>
-                <div><strong>Embedding provider:</strong> {settings.embedding_provider}</div>
-                <div><strong>Embedding model:</strong> {settings.embedding_model}</div>
-                <div><strong>Collection:</strong> {settings.collection_name}</div>
-              </div>
+        <nav className="sidebar-nav" aria-label="Dashboard navigation">
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={activeSection === item.id ? 'nav-link active' : 'nav-link'}
+              onClick={() => setActiveSection(item.id)}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
 
-              <label htmlFor="llm-model">LLM model</label>
+        <div className="sidebar-footer">
+          <span className="section-label">Vector collection</span>
+          <strong>{settings?.collection_name || 'Medical collection'}</strong>
+          <p className="muted">Each knowledge base maps to an isolated collection for retrieval.</p>
+        </div>
+      </aside>
+
+      <div className="workspace">
+        <header className="topbar">
+          <div>
+            <p className="eyebrow">Dashboard</p>
+            <h2>Medical RAG Assistant</h2>
+            <p className="subtitle">
+              Upload documents, ingest them into isolated knowledge bases, and answer questions from the active folder.
+            </p>
+          </div>
+
+          <div className="topbar-actions">
+            <button type="button" className="ghost-button" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
+            <button type="button" className="secondary-button" onClick={refreshDashboard}>
+              Refresh dashboard
+            </button>
+          </div>
+        </header>
+
+        <section id="overview" className="overview-grid">
+          <article className="overview-card accent">
+            <span className="overview-label">Active knowledge base</span>
+            <strong>{activeKnowledgeBaseLabel}</strong>
+            <p>Queries and ingestion are scoped to this folder.</p>
+          </article>
+          <article className="overview-card">
+            <span className="overview-label">Documents</span>
+            <strong>{documentCount}</strong>
+            <p>{documentCount === 1 ? 'PDF currently stored' : 'PDFs currently stored'}</p>
+          </article>
+          <article className="overview-card">
+            <span className="overview-label">Sources returned</span>
+            <strong>{sourceCount}</strong>
+            <p>Most recent answer sources</p>
+          </article>
+          <article className="overview-card">
+            <span className="overview-label">Backend</span>
+            <strong>{backendHealth}</strong>
+            <p>{settings?.llm_model || 'Awaiting settings'}</p>
+          </article>
+        </section>
+
+        {kbMessage || kbError || settingsMessage || ingestError || error ? (
+          <section className="alert-stack">
+            {kbMessage ? <div className="alert success">{kbMessage}</div> : null}
+            {settingsMessage ? <div className="alert success">{settingsMessage}</div> : null}
+            {kbError ? <div className="alert danger">{kbError}</div> : null}
+            {ingestError ? <div className="alert danger">{ingestError}</div> : null}
+            {error ? <div className="alert danger">{error}</div> : null}
+          </section>
+        ) : null}
+
+        <section id="knowledge-bases" className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Knowledge bases</p>
+              <h3>Manage isolated document folders</h3>
+            </div>
+            <button type="button" className="danger-button" onClick={handleClearData} disabled={!canClearData}>
+              {ingesting ? 'Clear disabled during ingest' : 'Clear active data'}
+            </button>
+          </div>
+
+          <div className="panel-grid two-up">
+            <form className="stack-form" onSubmit={(event) => event.preventDefault()}>
+              <label htmlFor="kb-select">Switch active knowledge base</label>
+              <select
+                id="kb-select"
+                value={activeKnowledgeBase}
+                onChange={(e) => handleKnowledgeBaseSwitch(e.target.value)}
+                disabled={switchingKnowledgeBase || ingesting}
+              >
+                {knowledgeBases.length === 0 ? (
+                  <option value="default">default</option>
+                ) : (
+                  knowledgeBases.map((kb) => (
+                    <option key={kb} value={kb}>
+                      {kb}
+                    </option>
+                  ))
+                )}
+              </select>
+
+              <label htmlFor="kb-new">Create new folder</label>
               <input
-                id="llm-model"
+                id="kb-new"
                 type="text"
-                value={editSettings.llm_model}
-                onChange={(e) => handleSettingChange('llm_model', e.target.value)}
+                value={newKnowledgeBaseName}
+                onChange={(e) => setNewKnowledgeBaseName(e.target.value)}
+                placeholder="Example: endocrinology-set-2"
+                disabled={creatingKnowledgeBase || ingesting}
               />
-
-              <label htmlFor="llm-temp">Temperature</label>
-              <input
-                id="llm-temp"
-                type="number"
-                step="0.1"
-                min="0"
-                value={editSettings.llm_temperature}
-                onChange={(e) => handleSettingChange('llm_temperature', e.target.value)}
-              />
-
-              <label htmlFor="num-ctx">Context size</label>
-              <input
-                id="num-ctx"
-                type="number"
-                min="1"
-                value={editSettings.ollama_num_ctx}
-                onChange={(e) => handleSettingChange('ollama_num_ctx', e.target.value)}
-              />
-
-              <label htmlFor="num-predict">Max output tokens</label>
-              <input
-                id="num-predict"
-                type="number"
-                min="1"
-                value={editSettings.ollama_num_predict}
-                onChange={(e) => handleSettingChange('ollama_num_predict', e.target.value)}
-              />
-
-              <label htmlFor="top-k">Retriever top-k</label>
-              <input
-                id="top-k"
-                type="number"
-                min="1"
-                value={editSettings.retriever_top_k}
-                onChange={(e) => handleSettingChange('retriever_top_k', e.target.value)}
-              />
-
-              <label htmlFor="ingest-size">Default ingest chunk size</label>
-              <input
-                id="ingest-size"
-                type="number"
-                min="100"
-                value={editSettings.ingest_chunk_size}
-                onChange={(e) => handleSettingChange('ingest_chunk_size', e.target.value)}
-              />
-
-              <label htmlFor="ingest-overlap">Default ingest chunk overlap</label>
-              <input
-                id="ingest-overlap"
-                type="number"
-                min="0"
-                value={editSettings.ingest_chunk_overlap}
-                onChange={(e) => handleSettingChange('ingest_chunk_overlap', e.target.value)}
-              />
-
-              <button type="submit" disabled={savingSettings}>
-                {savingSettings ? 'Saving...' : 'Save Settings'}
+              <button type="button" className="primary-button" onClick={handleKnowledgeBaseCreate} disabled={!canCreateKnowledgeBase || ingesting}>
+                {creatingKnowledgeBase ? 'Creating...' : 'Create and switch'}
               </button>
             </form>
-          ) : (
-            <p className="meta">Loading settings...</p>
-          )}
-          {settingsMessage ? <p className="ok-text">{settingsMessage}</p> : null}
 
-          <h2>Ingestion</h2>
-          <p className="meta">Uploaded documents: {documents.length}</p>
+            <form className="stack-form danger-form" onSubmit={handleKnowledgeBaseDelete}>
+              <label htmlFor="kb-delete">Delete folder</label>
+              <p className="helper-text">
+                Permanently removes the folder, all ingested vectors, and its ingest history. Default cannot be deleted.
+              </p>
+              {kbDeleteConfirm !== '' ? (
+                <div className="warning-box">
+                  <strong>Review before deleting</strong>
+                  <ul>
+                    <li>All documents in {kbDeleteConfirm}</li>
+                    <li>All vectors in the database collection</li>
+                    <li>All ingestion state for that folder</li>
+                  </ul>
+                </div>
+              ) : null}
+              <select
+                id="kb-delete"
+                value={kbDeleteConfirm}
+                onChange={(e) => setKbDeleteConfirm(e.target.value)}
+                disabled={deletingKnowledgeBase || ingesting}
+              >
+                <option value="">Select a knowledge base to delete</option>
+                {nonDefaultKnowledgeBases.map((kb) => (
+                  <option key={kb} value={kb}>
+                    {kb}
+                  </option>
+                ))}
+              </select>
+              <button type="submit" className="danger-button" disabled={kbDeleteConfirm === '' || deletingKnowledgeBase || ingesting}>
+                {deletingKnowledgeBase ? 'Deleting...' : 'Delete folder'}
+              </button>
+            </form>
+          </div>
 
-          <form onSubmit={handleUpload} className="query-form">
-            <label htmlFor="files">Upload PDFs</label>
-            <input id="files" type="file" accept="application/pdf" multiple onChange={handleFileSelection} />
-            <button type="submit" disabled={!canUpload}>
-              {uploading ? 'Uploading...' : 'Upload'}
-            </button>
-          </form>
+          <div className="inline-summary">
+            <div>
+              <span className="section-label">Active collection</span>
+              <strong>{settings?.collection_name || 'Loading...'}</strong>
+            </div>
+            <div>
+              <span className="section-label">Knowledge bases</span>
+              <strong>{knowledgeBaseCount}</strong>
+            </div>
+            <div>
+              <span className="section-label">Current docs</span>
+              <strong>{documentCount}</strong>
+            </div>
+          </div>
+        </section>
 
-          <form onSubmit={handleIngestStart} className="ingest-form">
-            <label htmlFor="chunk-size">Chunk Size</label>
-            <input
-              id="chunk-size"
-              type="number"
-              min="100"
-              value={chunkSize}
-              onChange={(e) => setChunkSize(e.target.value)}
-            />
+        <section id="documents" className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Documents</p>
+              <h3>Upload PDFs into the active folder</h3>
+            </div>
+            <span className="muted">{selectedFiles.length} selected</span>
+          </div>
 
-            <label htmlFor="chunk-overlap">Chunk Overlap</label>
-            <input
-              id="chunk-overlap"
-              type="number"
-              min="0"
-              value={chunkOverlap}
-              onChange={(e) => setChunkOverlap(e.target.value)}
-            />
+          <div className="panel-grid two-up">
+            <form onSubmit={handleUpload} className="stack-form">
+              <label htmlFor="files">Upload PDFs</label>
+              <input id="files" type="file" accept="application/pdf" multiple onChange={handleFileSelection} />
+              <button type="submit" className="primary-button" disabled={!canUpload}>
+                {uploading ? 'Uploading...' : 'Upload files'}
+              </button>
+              <p className="helper-text">Files are stored in the selected knowledge base folder before ingestion.</p>
+            </form>
 
-            <label className="checkbox-row" htmlFor="replace-collection">
-              <input
-                id="replace-collection"
-                type="checkbox"
-                checked={replaceCollection}
-                onChange={(e) => setReplaceCollection(e.target.checked)}
-              />
-              Replace existing vector collection
-            </label>
+            <div className="document-list-card">
+              <div className="document-list-header">
+                <span className="section-label">Current documents</span>
+                <strong>{documents.length}</strong>
+              </div>
+              {documents.length > 0 ? (
+                <ul className="document-list">
+                  {documents.map((doc) => (
+                    <li key={doc}>{doc}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="muted">No PDFs uploaded in this knowledge base yet.</p>
+              )}
+            </div>
+          </div>
+        </section>
 
-            <button type="submit" disabled={!canIngest}>
-              {ingesting ? 'Ingesting...' : 'Start Ingestion'}
-            </button>
-          </form>
+        <section id="ingest" className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Ingestion</p>
+              <h3>Chunk and index documents for retrieval</h3>
+            </div>
+            <span className={`health-pill health-${backendHealth}`}>Backend {backendHealth}</span>
+          </div>
 
-          {ingestStatus ? (
-            <div className="status-box">
-              <p><strong>Status:</strong> {ingestStatus.status}</p>
-              {ingestStatus.job_id ? <p><strong>Job:</strong> {ingestStatus.job_id}</p> : null}
-              {ingestStatus.started_at ? <p><strong>Started:</strong> {ingestStatus.started_at}</p> : null}
-              {ingestStatus.finished_at ? <p><strong>Finished:</strong> {ingestStatus.finished_at}</p> : null}
-              {ingestProgress ? (
+          <form onSubmit={handleIngestStart} className="panel-grid two-up ingest-layout">
+            <div className="stack-form">
+              <label htmlFor="chunk-size">Chunk size</label>
+              <input id="chunk-size" type="number" min="100" value={chunkSize} onChange={(e) => setChunkSize(e.target.value)} />
+
+              <label htmlFor="chunk-overlap">Chunk overlap</label>
+              <input id="chunk-overlap" type="number" min="0" value={chunkOverlap} onChange={(e) => setChunkOverlap(e.target.value)} />
+
+              <label className="checkbox-row" htmlFor="replace-collection">
+                <input
+                  id="replace-collection"
+                  type="checkbox"
+                  checked={replaceCollection}
+                  onChange={(e) => setReplaceCollection(e.target.checked)}
+                />
+                Replace existing vector collection
+              </label>
+
+              <button type="submit" className="primary-button" disabled={!canIngest}>
+                {ingesting ? 'Ingesting...' : 'Start ingestion'}
+              </button>
+            </div>
+
+            <div className="status-box dashboard-status">
+              <div className="status-header">
+                <div>
+                  <span className="section-label">Current state</span>
+                  <strong>{ingestStatus?.status || 'idle'}</strong>
+                </div>
+                {ingestStatus?.job_id ? <span className="chip">Job {ingestStatus.job_id.slice(0, 8)}</span> : null}
+              </div>
+
+              {ingestStatus ? (
                 <>
-                  <p>
-                    <strong>Overall:</strong> {overallProgressPercent}% ({ingestProgress.completed_files || 0}/{ingestProgress.total_files || 0} files)
-                  </p>
-                  <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${overallProgressPercent}%` }} />
+                  <div className="progress-section">
+                    <div className="progress-label-row">
+                      <span>Overall progress</span>
+                      <span>{overallProgressPercent}%</span>
+                    </div>
+                    <div className="progress-track">
+                      <div className="progress-fill" style={{ width: `${overallProgressPercent}%` }} />
+                    </div>
                   </div>
 
-                  <p>
-                    <strong>Current file:</strong> {ingestProgress.current_file || 'N/A'} ({ingestProgress.current_file_progress || 0}%)
-                  </p>
-                  <div className="progress-track">
-                    <div className="progress-fill current-file" style={{ width: `${ingestProgress.current_file_progress || 0}%` }} />
+                  <div className="progress-section">
+                    <div className="progress-label-row">
+                      <span>Current file</span>
+                      <span>{ingestProgress?.current_file_progress || 0}%</span>
+                    </div>
+                    <p className="muted">{ingestProgress?.current_file || 'Waiting for a file to process'}</p>
+                    <div className="progress-track slim">
+                      <div className="progress-fill current-file" style={{ width: `${ingestProgress?.current_file_progress || 0}%` }} />
+                    </div>
                   </div>
 
-                  {Array.isArray(ingestProgress.files) && ingestProgress.files.length > 0 ? (
+                  {Array.isArray(ingestProgress?.files) && ingestProgress.files.length > 0 ? (
                     <div className="file-progress-list">
                       {ingestProgress.files.map((file) => (
                         <div key={file.file} className="file-progress-item">
@@ -786,81 +1023,180 @@ export default function App() {
                       ))}
                     </div>
                   ) : null}
+
+                  {ingestStatus.result ? (
+                    <div className="ingest-result-grid">
+                      <div><span>Scanned</span><strong>{ingestStatus.result.scanned_files}</strong></div>
+                      <div><span>Parsed</span><strong>{ingestStatus.result.parsed_documents}</strong></div>
+                      <div><span>Chunks</span><strong>{ingestStatus.result.chunks_created}</strong></div>
+                    </div>
+                  ) : null}
+
+                  {ingestStatus.result?.failed_files?.length ? (
+                    <div className="failed-list">
+                      <span className="section-label">Failed files</span>
+                      <ul>
+                        {ingestStatus.result.failed_files.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
                 </>
-              ) : null}
-              {ingestStatus.result ? (
-                <p>
-                  <strong>Result:</strong> scanned {ingestStatus.result.scanned_files}, parsed {ingestStatus.result.parsed_documents}, chunks {ingestStatus.result.chunks_created}
-                </p>
-              ) : null}
-              {ingestStatus.result?.failed_files?.length ? (
+              ) : (
+                <p className="muted">No ingest job has run yet.</p>
+              )}
+            </div>
+          </form>
+        </section>
+
+        <section id="chat" className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Chat</p>
+              <h3>Ask questions against the active knowledge base</h3>
+            </div>
+            <span className="chip">{sourceCount} sources returned</span>
+          </div>
+
+          <div className="panel-grid two-up chat-layout">
+            <form onSubmit={handleSubmit} className="stack-form">
+              <label htmlFor="question">Question</label>
+              <textarea
+                id="question"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Example: What abnormal lab values are reported?"
+                rows={7}
+              />
+              <button type="submit" className="primary-button" disabled={!canAsk}>
+                {loading ? 'Thinking...' : 'Ask question'}
+              </button>
+            </form>
+
+            <div className="answer-card">
+              <div className="panel-header compact">
                 <div>
-                  <strong>Failed files:</strong>
-                  <ul>
-                    {ingestStatus.result.failed_files.map((item) => (
-                      <li key={item}>{item}</li>
+                  <span className="section-label">Answer</span>
+                  <h4>Retrieved response</h4>
+                </div>
+              </div>
+              <p className={answer ? 'answer-text' : 'muted'}>{answer || 'Submit a question to see an answer.'}</p>
+
+              <div className="sources-block">
+                <span className="section-label">Sources</span>
+                {sources.length === 0 ? (
+                  <p className="muted">No sources returned yet.</p>
+                ) : (
+                  <ul className="source-list">
+                    {sources.map((source, index) => (
+                      <li key={`${source.source || 'unknown'}-${index}`}>
+                        <strong>{source.source || 'unknown document'}</strong>
+                        {source.page ? <span>page {source.page}</span> : null}
+                      </li>
                     ))}
                   </ul>
-                </div>
-              ) : null}
+                )}
+              </div>
             </div>
-          ) : null}
+          </div>
+        </section>
 
-          {ingestError ? <p className="error">{ingestError}</p> : null}
-          {documents.length > 0 ? (
-            <ul>
-              {documents.map((doc) => (
-                <li key={doc}>{doc}</li>
-              ))}
-            </ul>
+        <section id="settings" className="panel panel-wide">
+          <div className="panel-header">
+            <div>
+              <p className="section-label">Settings</p>
+              <h3>Runtime configuration</h3>
+            </div>
+          </div>
+
+          {settings && editSettings ? (
+            <form className="settings-form dashboard-settings" onSubmit={handleSaveSettings}>
+              <div className="settings-grid stat-grid">
+                <div><span>LLM provider</span><strong>{settings.llm_provider}</strong></div>
+                <div><span>Embedding provider</span><strong>{settings.embedding_provider}</strong></div>
+                <div><span>Embedding model</span><strong>{settings.embedding_model}</strong></div>
+                <div><span>Collection</span><strong>{settings.collection_name}</strong></div>
+              </div>
+
+              <div className="panel-grid two-up">
+                <div className="stack-form">
+                  <label htmlFor="llm-model">LLM model</label>
+                  <input
+                    id="llm-model"
+                    type="text"
+                    value={editSettings.llm_model}
+                    onChange={(e) => handleSettingChange('llm_model', e.target.value)}
+                  />
+
+                  <label htmlFor="llm-temp">Temperature</label>
+                  <input
+                    id="llm-temp"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={editSettings.llm_temperature}
+                    onChange={(e) => handleSettingChange('llm_temperature', e.target.value)}
+                  />
+
+                  <label htmlFor="num-ctx">Context size</label>
+                  <input
+                    id="num-ctx"
+                    type="number"
+                    min="1"
+                    value={editSettings.ollama_num_ctx}
+                    onChange={(e) => handleSettingChange('ollama_num_ctx', e.target.value)}
+                  />
+
+                  <label htmlFor="num-predict">Max output tokens</label>
+                  <input
+                    id="num-predict"
+                    type="number"
+                    min="1"
+                    value={editSettings.ollama_num_predict}
+                    onChange={(e) => handleSettingChange('ollama_num_predict', e.target.value)}
+                  />
+                </div>
+
+                <div className="stack-form">
+                  <label htmlFor="top-k">Retriever top-k</label>
+                  <input
+                    id="top-k"
+                    type="number"
+                    min="1"
+                    value={editSettings.retriever_top_k}
+                    onChange={(e) => handleSettingChange('retriever_top_k', e.target.value)}
+                  />
+
+                  <label htmlFor="ingest-size">Default ingest chunk size</label>
+                  <input
+                    id="ingest-size"
+                    type="number"
+                    min="100"
+                    value={editSettings.ingest_chunk_size}
+                    onChange={(e) => handleSettingChange('ingest_chunk_size', e.target.value)}
+                  />
+
+                  <label htmlFor="ingest-overlap">Default ingest chunk overlap</label>
+                  <input
+                    id="ingest-overlap"
+                    type="number"
+                    min="0"
+                    value={editSettings.ingest_chunk_overlap}
+                    onChange={(e) => handleSettingChange('ingest_chunk_overlap', e.target.value)}
+                  />
+
+                  <button type="submit" className="primary-button" disabled={savingSettings}>
+                    {savingSettings ? 'Saving...' : 'Save settings'}
+                  </button>
+                </div>
+              </div>
+            </form>
           ) : (
-            <p className="meta">No PDFs uploaded yet.</p>
+            <p className="muted">Loading settings...</p>
           )}
         </section>
-
-        <form onSubmit={handleSubmit} className="query-form">
-          <label htmlFor="question">Question</label>
-          <textarea
-            id="question"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="Example: What abnormal lab values are reported?"
-            rows={4}
-          />
-          <button type="submit" disabled={!canAsk}>
-            {loading ? 'Thinking...' : 'Ask'}
-          </button>
-        </form>
-
-        {error ? <p className="error">{error}</p> : null}
-
-        <section className="result">
-          <h2>Answer</h2>
-          <p>{answer || 'Submit a question to see an answer.'}</p>
-        </section>
-
-        <section className="sources">
-          <h2>Sources</h2>
-          {sources.length === 0 ? (
-            <p>No sources returned yet.</p>
-          ) : (
-            <ul>
-              {sources.map((source, index) => (
-                <li key={`${source.source || 'unknown'}-${index}`}>
-                  <strong>{source.source || 'unknown document'}</strong>
-                  {source.page ? `, page ${source.page}` : ''}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="settings-note">
-          <p className="meta">
-            Fine tuning happens in the Ingestion and Current Settings panels. Change the values there, then restart ingestion.
-          </p>
-        </section>
-      </section>
+      </div>
     </main>
   );
 }

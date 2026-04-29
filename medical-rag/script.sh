@@ -7,12 +7,31 @@ BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 COMPOSE_FILE="$ROOT_DIR/docker-compose.yml"
 LOG_DIR="$ROOT_DIR/.run-logs"
-BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
+BACKEND_HOST="${BACKEND_HOST:-0.0.0.0}"
 BACKEND_PORT="${BACKEND_PORT:-5200}"
-FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
+FRONTEND_HOST="${FRONTEND_HOST:-0.0.0.0}"
 FRONTEND_PORT="${FRONTEND_PORT:-5201}"
 VENV_PY="${VENV_PY:-$ROOT_DIR/../.venv/bin/python}"
 POSTGRES_PORT="${POSTGRES_PORT:-5202}"
+CHECK_HOST="${CHECK_HOST:-127.0.0.1}"
+
+detect_access_host() {
+  if [[ -n "${PUBLIC_HOST:-}" ]]; then
+    printf '%s\n' "$PUBLIC_HOST"
+    return
+  fi
+
+  if command -v hostname >/dev/null 2>&1; then
+    local detected_host
+    detected_host="$(hostname -I 2>/dev/null | awk '{print $1}')"
+    if [[ -n "$detected_host" ]]; then
+      printf '%s\n' "$detected_host"
+      return
+    fi
+  fi
+
+  printf '%s\n' "127.0.0.1"
+}
 
 backend_pid=""
 frontend_pid=""
@@ -147,13 +166,15 @@ main() {
   start_backend
   start_frontend
 
-  wait_for_http "http://$BACKEND_HOST:$BACKEND_PORT/health" "backend health endpoint"
-  wait_for_http "http://$FRONTEND_HOST:$FRONTEND_PORT" "frontend dev server"
+  wait_for_http "http://$CHECK_HOST:$BACKEND_PORT/health" "backend health endpoint"
+  wait_for_http "http://$CHECK_HOST:$FRONTEND_PORT" "frontend dev server"
+
+  ACCESS_HOST="$(detect_access_host)"
 
   echo ""
   echo "Stack is running:"
-  echo "  Backend:  http://$BACKEND_HOST:$BACKEND_PORT"
-  echo "  Frontend: http://$FRONTEND_HOST:$FRONTEND_PORT"
+  echo "  Backend:  http://$ACCESS_HOST:$BACKEND_PORT"
+  echo "  Frontend: http://$ACCESS_HOST:$FRONTEND_PORT"
   echo "  Logs:     $LOG_DIR/backend.log and $LOG_DIR/frontend.log"
   echo ""
   echo "Press Ctrl+C to stop everything."
