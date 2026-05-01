@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 const DEFAULT_API_PORT = 5200;
 const LOCALHOST_API_URL = /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/i;
@@ -981,7 +982,29 @@ export default function App() {
                   <h4>Retrieved response</h4>
                 </div>
               </div>
-              <p className={answer ? 'answer-text' : 'muted'}>{answer || 'Submit a question to see an answer.'}</p>
+              <div className={answer ? 'answer-text' : 'muted'}>
+                {answer ? (
+                  <ReactMarkdown
+                    components={{
+                      p: ({node, ...props}) => <p {...props} className="markdown-paragraph" />,
+                      strong: ({node, ...props}) => <strong {...props} />,
+                      em: ({node, ...props}) => <em {...props} />,
+                      br: () => <br />,
+                      ul: ({node, ...props}) => <ul className="markdown-list" {...props} />,
+                      ol: ({node, ...props}) => <ol className="markdown-list" {...props} />,
+                      li: ({node, ...props}) => <li {...props} />,
+                      h1: ({node, ...props}) => <h3 {...props} className="markdown-heading" />,
+                      h2: ({node, ...props}) => <h4 {...props} className="markdown-heading" />,
+                      h3: ({node, ...props}) => <h5 {...props} className="markdown-heading" />,
+                      code: ({node, inline, ...props}) => inline ? <code {...props} className="inline-code" /> : <pre {...props} className="code-block" />,
+                    }}
+                  >
+                    {answer}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="muted">Submit a question to see an answer.</p>
+                )}
+              </div>
 
               <div className="sources-block">
                 <span className="section-label">Sources</span>

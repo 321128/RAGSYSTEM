@@ -18,6 +18,8 @@ Using the context below, answer the question directly and concisely.
 
 Rules:
 - Base your answer entirely on the provided context.
+- If the question is descriptive like "Give summary of X", provide a structured answer with clear section headers.
+- If the question is fact-based like "What is X?", provide a short, direct answer without section headers.
 - If the context contains relevant information, provide a complete answer from that evidence.
 - If context is partial but relevant, provide the best answer you can support.
 - Never use external knowledge or assumptions beyond what the context states.

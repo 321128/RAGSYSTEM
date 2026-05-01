@@ -99,6 +99,68 @@ h1 {
   color: #991b1b;
 }
 
+/* Markdown rendering styles */
+.answer-text {
+  line-height: 1.8;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.answer-text strong {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.answer-text em {
+  font-style: italic;
+  color: #374151;
+}
+
+.markdown-paragraph {
+  margin: 0.75rem 0;
+  color: #374151;
+  line-height: 1.8;
+}
+
+.markdown-heading {
+  margin: 1.25rem 0 0.75rem 0;
+  color: #1f2937;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.markdown-list {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.markdown-list li {
+  margin: 0.5rem 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.inline-code {
+  background: #f3f4f6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #dc2626;
+}
+
+.code-block {
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
 .warning-box code {
   background: #fecaca;
   padding: 2px 6px;
